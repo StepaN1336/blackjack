@@ -61,6 +61,8 @@ let dealerCards = '';
 let gameEndStatus = false;
 let dealerAceInHandAmount = 0;
 let playerAceInHandAmount = 0;
+let balance = 1000;
+let bet = 0;
 
 const startButton = document.querySelector('.start-button');
 const passButton = document.querySelector('.pass-button');
@@ -81,6 +83,15 @@ getCardButton.addEventListener('click', () => {
 })
 
 function startNewGame() {
+    bet = parseInt(prompt('Place your bet!'));
+    if(!bet || bet <= 0) {
+        alert('Bet should be a positive number!');
+        return;
+    } else if(bet > balance) {
+        alert('You cannot bet more than your current balance!');
+        return;
+    }
+    balance -= bet;
     cards = { ...initialCards };
     playerScore = 0;
     dealerScore = 0;
@@ -88,6 +99,8 @@ function startNewGame() {
     dealerCards = '';
     gameEndStatus = false;
     gameResultField.textContent = '';
+    dealerAceInHandAmount = 0;
+    playerAceInHandAmount = 0;
     for (let i = 0; i < 2; i++) {
         addPlayerCard()
     }
@@ -99,10 +112,14 @@ function gameOver() {
         gameResultField.textContent = 'Dealer Won!';
     } else if(dealerScore === playerScore) {
         gameResultField.textContent = 'Tie! Your bet have been returned!';
+        balance += bet;
+        cardAndScoreRender();
     } else if(playerScore > 21){
         gameResultField.textContent = 'Dealer Won!';
     } else {
         gameResultField.textContent = 'Player Won!';
+        balance += 2 * bet;
+        cardAndScoreRender();
     }
 };
 
@@ -126,10 +143,10 @@ function addPlayerCard() {
         playerAceInHandAmount--;
     }
     if (playerCard[0].includes('ace')) {
-        playerAceInHandAmount++;
         if (playerScore > 10) {
             playerScore += 1
         } else {
+            playerAceInHandAmount++;
             playerScore += 11;
         }
         cardAndScoreRender()
@@ -149,16 +166,17 @@ function addDealerCard() {
         dealerAceInHandAmount--;
     }
     if (dealerCard[0].includes('ace')) {
-        dealerAceInHandAmount++;
         if (dealerScore > 10) {
             dealerScore += 1
         } else {
+            dealerAceInHandAmount++;
             dealerScore += 11;
         }
         cardAndScoreRender()
         return;
     }
     dealerScore += dealerCard[1];
+    
     cardAndScoreRender()
 }
 
@@ -167,11 +185,13 @@ function cardAndScoreRender() {
     const dealerScoreField = document.querySelector('.dealer-score');
     const playerCardsField = document.querySelector('.player-cards');
     const playerScoreField = document.querySelector('.player-score');
+    const playerBalance = document.querySelector('.balance');
 
     dealerCardsField.textContent = `Dealer Cards: ${dealerCards}`;
     dealerScoreField.textContent = `Dealer Score: ${dealerScore}`;
     playerCardsField.textContent = `Player Cards: ${playerCards}`;
     playerScoreField.textContent = `Player Score: ${playerScore}`;
+    playerBalance.textContent = `Your Balance: ${balance}`;
 }
 
 function playerPass() {
