@@ -59,6 +59,8 @@ let dealerScore = 0;
 let playerCards = '';
 let dealerCards = '';
 let gameEndStatus = false;
+let dealerAceInHandAmount = 0;
+let playerAceInHandAmount = 0;
 
 const startButton = document.querySelector('.start-button');
 const passButton = document.querySelector('.pass-button');
@@ -119,10 +121,11 @@ function addPlayerCard() {
     const playerCard = getRandomCard();
     playerCards += playerCard[0] + ', ';
     
-    if(playerCards.includes('ace') && !playerCard[0].includes('ace') && playerScore + playerCard[1] > 21) {
+    if(playerCards.includes('ace') && !playerCard[0].includes('ace') && playerScore + playerCard[1] > 21 && playerAceInHandAmount > 0) {
         playerScore -= 10;
     }
     if (playerCard[0].includes('ace')) {
+        playerAceInHandAmount++;
         if (playerScore > 10) {
             playerScore += 1
         } else {
@@ -141,10 +144,11 @@ function addDealerCard() {
     const dealerCard = getRandomCard();
     dealerCards += dealerCard[0] + ', ';
 
-    if(dealerCards.includes('ace') && !dealerCard[0].includes('ace') && dealerScore + dealerCard[1] > 21) {
+    if(dealerCards.includes('ace') && !dealerCard[0].includes('ace') && dealerScore + dealerCard[1] > 21 && dealerAceInHandAmount > 0) {
         dealerScore -= 10;
     }
     if (dealerCard[0].includes('ace')) {
+        dealerAceInHandAmount++;
         if (dealerScore > 10) {
             dealerScore += 1
         } else {
@@ -175,6 +179,7 @@ function playerPass() {
         return;
     }
     for (; ;) {
+        setTimeout(1000);
         if(dealerScore < playerScore) addDealerCard();
         if(dealerScore > 21) {
             gameEndStatus = true;
