@@ -121,8 +121,9 @@ function addPlayerCard() {
     const playerCard = getRandomCard();
     playerCards += playerCard[0] + ', ';
     
-    if(playerCards.includes('ace') && !playerCard[0].includes('ace') && playerScore + playerCard[1] > 21 && playerAceInHandAmount > 0) {
+    if((playerCards.includes('ace')) && (!playerCard[0].includes('ace')) && (playerScore + playerCard[1] > 21) && (playerAceInHandAmount > 0)) {
         playerScore -= 10;
+        playerAceInHandAmount--;
     }
     if (playerCard[0].includes('ace')) {
         playerAceInHandAmount++;
@@ -131,7 +132,6 @@ function addPlayerCard() {
         } else {
             playerScore += 11;
         }
-        console.log('Test');
         cardAndScoreRender()
         return;
     }
@@ -146,6 +146,7 @@ function addDealerCard() {
 
     if(dealerCards.includes('ace') && !dealerCard[0].includes('ace') && dealerScore + dealerCard[1] > 21 && dealerAceInHandAmount > 0) {
         dealerScore -= 10;
+        dealerAceInHandAmount--;
     }
     if (dealerCard[0].includes('ace')) {
         dealerAceInHandAmount++;
