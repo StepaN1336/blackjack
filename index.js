@@ -1,233 +1,231 @@
-const initialCards = {
-    aceOfHearts: [1, 11],
-    aceOfSpades: [1, 11],
-    aceOfDiamonds: [1, 11],
-    aceOfClubs: [1, 11],
-    kingOfHearts: 10,
-    kingOfSpades: 10,
-    kingOfDiamonds: 10,
-    kingOfClubs: 10,
-    queenOfHearts: 10,
-    queenOfSpades: 10,
-    queenOfDiamonds: 10,
-    queenOfClubs: 10,
-    jackOfHearts: 10,
-    jackOfSpades: 10,
-    jackOfDiamonds: 10,
-    jackOfClubs: 10,
-    tenOfHearts: 10,
-    tenOfSpades: 10,
-    tenOfDiamonds: 10,
-    tenOfClubs: 10,
-    nineOfHearts: 9,
-    nineOfSpades: 9,
-    nineOfDiamonds: 9,
-    nineOfClubs: 9,
-    eightOfHearts: 8,
-    eightOfSpades: 8,
-    eightOfDiamonds: 8,
-    eightOfClubs: 8,
-    sevenOfHearts: 7,
-    sevenOfSpades: 7,
-    sevenOfDiamonds: 7,
-    sevenOfClubs: 7,
-    sixOfHearts: 6,
-    sixOfSpades: 6,
-    sixOfDiamonds: 6,
-    sixOfClubs: 6,
-    fiveOfHearts: 5,
-    fiveOfSpades: 5,
-    fiveOfDiamonds: 5,
-    fiveOfClubs: 5,
-    fourOfHearts: 4,
-    fourOfSpades: 4,
-    fourOfDiamonds: 4,
-    fourOfClubs: 4,
-    threeOfHearts: 3,
-    threeOfSpades: 3,
-    threeOfDiamonds: 3,
-    threeOfClubs: 3,
-    twoOfHearts: 2,
-    twoOfSpades: 2,
-    twoOfDiamonds: 2,
-    twoOfClubs: 2
-};
-let cards = { ...initialCards };
-
+let initialCards = {};
+let cards = {};
 let playerScore = 0;
 let dealerScore = 0;
-let playerCards = '';
-let dealerCards = '';
+let playerCards = [];
+let dealerCards = [];
 let gameEndStatus = false;
+let gameStartStatus = false;
 let dealerAceInHandAmount = 0;
 let playerAceInHandAmount = 0;
 let balance = 1000;
 let bet = 0;
 
-const startButton = document.querySelector('.start-button');
-const passButton = document.querySelector('.pass-button');
-const getCardButton = document.querySelector('.get-button');
-const gameResultField = document.querySelector('.game-result');
+const startButton = document.querySelector('.blackjack__button--start');
+const passButton = document.querySelector('.blackjack__button--pass');
+const getCardButton = document.querySelector('.blackjack__button--get');
+const gameResultField = document.querySelector('.blackjack__result');
 
+fetch('cards.json')
+    .then((res) => res.json())
+    .then((data) => {
+        initialCards = data;
+        cards = { ...initialCards };
+    });
 
-startButton.addEventListener('click', () => {
-    startNewGame();
+startButton.addEventListener('click', () => startNewGame());
+passButton.addEventListener('click', () => playerPass());
+getCardButton.addEventListener('click', () => playerGotCard());
+
+window.addEventListener('DOMContentLoaded', () => {
+    const disclaimerModal = document.querySelector('.blackjack__modal--disclaimer');
+    disclaimerModal.style.display = 'flex';
+
+    document.querySelector('.blackjack__modal--disclaimer-accept').onclick = () => {
+        disclaimerModal.style.display = 'none';
+    };
 });
 
-passButton.addEventListener('click', () => {
-    playerPass();
-});
-
-getCardButton.addEventListener('click', () => {
-    playerGotCard()
-})
-
-function startNewGame() {
-    bet = parseInt(prompt('Place your bet!'));
-    if(!bet || bet <= 0) {
-        alert('Bet should be a positive number!');
-        return;
-    } else if(bet > balance) {
-        alert('You cannot bet more than your current balance!');
+async function startNewGame() {
+    if (balance <= 0) {
+        showModal("You have no money left!");
         return;
     }
+
+    bet = await askBet(balance);
+
+    if(bet === null) {
+        showModal('You canceled your bet!');
+        return;
+    }
+    
+    gameStartStatus = true;
     balance -= bet;
     cards = { ...initialCards };
     playerScore = 0;
     dealerScore = 0;
-    playerCards = '';
-    dealerCards = '';
+    playerCards = [];
+    dealerCards = [];
     gameEndStatus = false;
     gameResultField.textContent = '';
     dealerAceInHandAmount = 0;
     playerAceInHandAmount = 0;
+
     for (let i = 0; i < 2; i++) {
-        addPlayerCard()
+        addPlayerCard();
     }
     addDealerCard();
 }
 
-function gameOver() {
-    if((dealerScore > playerScore) && dealerScore <= 21) {
-        gameResultField.textContent = 'Dealer Won!';
-    } else if(dealerScore === playerScore) {
-        gameResultField.textContent = 'Tie! Your bet have been returned!';
-        balance += bet;
-        cardAndScoreRender();
-    } else if(playerScore > 21){
-        gameResultField.textContent = 'Dealer Won!';
-    } else {
-        gameResultField.textContent = 'Player Won!';
-        balance += 2 * bet;
-        cardAndScoreRender();
-    }
-};
+function askBet(maxBet) {
+    return new Promise((resolve) => {
+        const modal = document.querySelector('.blackjack__modal--bet');
+        const input = document.querySelector('.blackjack__bet-input');
+        const error = document.querySelector('.blackjack__bet-error');
+        const placeBetBtn = document.querySelector('.blackjack__place-bet-btn');
+        const cancelBetBtn = document.querySelector('.blackjack__place-bet-cancel-btn');
+
+        input.value = '';
+        error.textContent = '';
+        modal.style.display = 'flex';
+
+        placeBetBtn.onclick = () => {
+            const value = parseInt(input.value);
+            if (!value || value <= 0) {
+                error.textContent = 'Bet must be a positive number.';
+            } else if (value > maxBet) {
+                error.textContent = 'You cannot bet more than your balance.';
+            } else {
+                modal.style.display = 'none';
+                resolve(value);
+            }
+        };
+
+        cancelBetBtn.onclick = () => {
+            modal.style.display = 'none';
+            resolve(null);
+        }
+    });
+}
 
 function getRandomCard() {
     const keys = Object.keys(cards);
-    const randomIndex = Math.floor(Math.random() * keys.length);
-    const randomKey = keys[randomIndex];
-    const randomValue = cards[randomKey];
-
-    delete cards[randomKey];
-
-    return [randomKey, randomValue];
+    const index = Math.floor(Math.random() * keys.length);
+    const key = keys[index];
+    const value = cards[key];
+    delete cards[key];
+    return [key, value];
 }
 
 function addPlayerCard() {
-    const playerCard = getRandomCard();
-    playerCards += playerCard[0] + ', ';
-    
-    if((playerCards.includes('ace')) && (!playerCard[0].includes('ace')) && (playerScore + playerCard[1] > 21) && (playerAceInHandAmount > 0)) {
-        playerScore -= 10;
-        playerAceInHandAmount--;
+    if (!gameStartStatus) {
+        showModal('Please, place your bet to start a new game.');
+        return;
     }
-    if (playerCard[0].includes('ace')) {
+    const [name, value] = getRandomCard();
+    playerCards.push(name);
+
+    if (name.includes('A')) {
         if (playerScore > 10) {
-            playerScore += 1
+            playerScore += 1;
         } else {
             playerAceInHandAmount++;
             playerScore += 11;
         }
-        cardAndScoreRender()
-        return;
+    } else {
+        playerScore += value;
+        if (playerScore > 21 && playerAceInHandAmount > 0) {
+            playerScore -= 10;
+            playerAceInHandAmount--;
+        }
     }
 
-    playerScore += playerCard[1];
-    cardAndScoreRender()
+    cardAndScoreRender();
 }
 
 function addDealerCard() {
-    const dealerCard = getRandomCard();
-    dealerCards += dealerCard[0] + ', ';
+    const [name, value] = getRandomCard();
+    dealerCards.push(name);
 
-    if(dealerCards.includes('ace') && !dealerCard[0].includes('ace') && dealerScore + dealerCard[1] > 21 && dealerAceInHandAmount > 0) {
-        dealerScore -= 10;
-        dealerAceInHandAmount--;
-    }
-    if (dealerCard[0].includes('ace')) {
+    if (name.includes('A')) {
         if (dealerScore > 10) {
-            dealerScore += 1
+            dealerScore += 1;
         } else {
             dealerAceInHandAmount++;
             dealerScore += 11;
         }
-        cardAndScoreRender()
-        return;
+    } else {
+        dealerScore += value;
+        if (dealerScore > 21 && dealerAceInHandAmount > 0) {
+            dealerScore -= 10;
+            dealerAceInHandAmount--;
+        }
     }
-    dealerScore += dealerCard[1];
-    
-    cardAndScoreRender()
+
+    cardAndScoreRender();
+}
+
+function renderCards(container, cards) {
+    container.innerHTML = '';
+    cards.forEach((cardName) => {
+        const img = document.createElement('img');
+        img.src = `images/cards/${cardName}.png`;
+        img.alt = cardName;
+        container.appendChild(img);
+    });
 }
 
 function cardAndScoreRender() {
-    const dealerCardsField = document.querySelector('.dealer-cards');
-    const dealerScoreField = document.querySelector('.dealer-score');
-    const playerCardsField = document.querySelector('.player-cards');
-    const playerScoreField = document.querySelector('.player-score');
-    const playerBalance = document.querySelector('.balance');
+    document.querySelector('.blackjack__dealer-cards').innerHTML = 'Dealer Cards: ';
+    document.querySelector('.blackjack__player-cards').innerHTML = 'Player Cards: ';
+    renderCards(document.querySelector('.blackjack__dealer-cards'), dealerCards);
+    renderCards(document.querySelector('.blackjack__player-cards'), playerCards);
+    document.querySelector('.blackjack__dealer-score').textContent = `Dealer Score: ${dealerScore}`;
+    document.querySelector('.blackjack__player-score').textContent = `Player Score: ${playerScore}`;
+    document.querySelector('.blackjack__balance').textContent = `Your Balance: ${balance}`;
+}
 
-    dealerCardsField.textContent = `Dealer Cards: ${dealerCards}`;
-    dealerScoreField.textContent = `Dealer Score: ${dealerScore}`;
-    playerCardsField.textContent = `Player Cards: ${playerCards}`;
-    playerScoreField.textContent = `Player Score: ${playerScore}`;
-    playerBalance.textContent = `Your Balance: ${balance}`;
+function gameOver() {
+    if ((dealerScore > playerScore && dealerScore <= 21) || playerScore > 21) {
+        gameResultField.textContent = 'Dealer Won!';
+    } else if (dealerScore === playerScore) {
+        gameResultField.textContent = 'Tie! Your bet has been returned!';
+        balance += bet;
+    } else {
+        gameResultField.textContent = 'Player Won!';
+        balance += bet * 2;
+    }
+    cardAndScoreRender();
 }
 
 function playerPass() {
-    if(gameEndStatus === true) {
-        alert('Game ended! Start a new one');
+    if (gameEndStatus) {
+        showModal('Game ended! Start a new one.');
+        return;
+    } else if (!gameStartStatus) {
+        showModal('Please, place your bet to start a new game.');
         return;
     }
-    for (; ;) {
-        setTimeout(1000);
-        if(dealerScore < playerScore) addDealerCard();
-        if(dealerScore > 21) {
-            gameEndStatus = true;
-            gameOver();
-            break
-        }
-        if(dealerScore === playerScore) {
-            gameEndStatus = true;
-            gameOver();
-            break;
-        }
-        if(dealerScore > playerScore) {
-            gameEndStatus = true;
-            gameOver();
-            break;
-        }
+
+    while (dealerScore < playerScore && dealerScore < 22) {
+        addDealerCard();
     }
+
+    gameEndStatus = true;
+    gameOver();
 }
 
 function playerGotCard() {
-    if(gameEndStatus === true) {
-        alert('Game ended! Start a new one');
+    if (gameEndStatus) {
+        showModal('Game ended! Start a new one.');
         return;
     }
     addPlayerCard();
-    if(playerScore > 21) {
+    if (playerScore > 21) {
         gameEndStatus = true;
         gameOver();
     }
 }
+
+function showModal(message) {
+    const modal = document.querySelector('.blackjack__modal--message');
+    const modalText = document.querySelector('.blackjack__modal--message-text');
+
+    modalText.textContent = message;
+    modal.style.display = 'flex';
+
+    document.querySelector('.blackjack__modal--message-close').onclick = () => {
+        modal.style.display = 'none';
+    };
+}
+

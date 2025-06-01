@@ -1,25 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlackJack</title>
+    <link rel="stylesheet" href="index.css" />
 </head>
-<body>
-    <h1>BlackJack</h1>
-    <div class="dealer-div">
-        <div class="dealer-cards">Dealer Cards: </div>
-        <div class="dealer-score">Dealer Score: </div>
+
+<body class="blackjack">
+
+    <h1 class="blackjack__title">BlackJack</h1>
+
+    <div class="blackjack__dealer">
+        <div class="blackjack__dealer-cards">Dealer Cards:</div>
+        <div class="blackjack__dealer-score">Dealer Score:</div>
     </div>
-    <div class="player-div">
-        <div class="player-cards">Player Cards: </div>
-        <div class="player-score">Player Score: </div>
-        <button class="get-button">Get A Card</button>
-        <button class="pass-button">Pass</button>
-        <button class="start-button">New Game</button>
+
+    <div class="blackjack__player">
+        <div class="blackjack__player-cards">Player Cards:</div>
+        <div class="blackjack__player-score">Player Score:</div>
+        <button class="blackjack__button blackjack__button--get">Get A Card</button>
+        <button class="blackjack__button blackjack__button--pass">Pass</button>
+        <button class="blackjack__button blackjack__button--start">New Game</button>
     </div>
-    <div class="balance">Your Balance: 1000</div>
-    <div class="game-result"></div>
+
+    <div class="blackjack__balance">Your Balance: 1000</div>
+    <div class="blackjack__result"></div>
+
+    <!-- Message Modal -->
+    <div class="blackjack__modal blackjack__modal--message">
+        <div class="blackjack__modal-content">
+            <p class="blackjack__modal--message-text"></p>
+            <button class="blackjack__modal-button blackjack__modal--message-close">OK</button>
+        </div>
+    </div>
+
+    <!-- Disclaimer Modal -->
+    <div class="blackjack__modal blackjack__modal--disclaimer">
+        <div class="blackjack__modal-content">
+            <h2 class="blackjack__modal-title">Disclaimer</h2>
+            <p class="blackjack__modal-description">
+                This game is a student project and not a real gambling application. We do not encourage gambling,
+                and we are not responsible for any gambling-related issues outside this game.
+            </p>
+            <button class="blackjack__modal-button blackjack__modal--disclaimer-accept">I Understand</button>
+        </div>
+    </div>
+
+    <!-- Bet Modal -->
+    <div class="blackjack__modal blackjack__modal--bet">
+        <div class="blackjack__modal-content">
+            <h2 class="blackjack__modal-title">Place your bet!</h2>
+            <input type="number" class="blackjack__bet-input" min="1" placeholder="Enter amount..." />
+            <div class="blackjack__bet-error"></div>
+            <button class="blackjack__modal-button blackjack__place-bet-btn">Place</button>
+            <button class="blackjack__modal-button blackjack__place-bet-cancel-btn">Cancel</button>
+        </div>
+    </div>
+
     <script src="index.js"></script>
 </body>
+
 </html>
